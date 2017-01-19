@@ -30,7 +30,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/geojson2image.
+Bug reports and pull requests are welcome on GitHub at https://github.com/brycejohnston/geojson2image.
 
 
 ## License
