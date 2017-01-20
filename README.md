@@ -1,8 +1,11 @@
-# Geojson2image
+# geojson2image
 
 Ruby library for generating images from GeoJSON
 
 ## Installation
+
+geojson2image requires ImageMagick to be installed, see here for more details:
+https://github.com/rmagick/rmagick
 
 Add this line to your application's Gemfile:
 

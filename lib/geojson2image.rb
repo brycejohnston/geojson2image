@@ -1,5 +1,6 @@
 require "geojson2image/version"
 require "oj"
+require "rmagick"
 
 module Geojson2image
   class Convert
@@ -31,19 +32,22 @@ module Geojson2image
     def get_boundary(json)
       case json['type']
       when 'GeometryCollection'
-        return_boundary = nil;
+        return_boundary = nil
         json['geometries'].each do |geometry|
           return_boundary = compute_boundary(return_boundary, get_boundary(geometry))
         end
         return return_boundary
+
       when 'FeatureCollection'
-        return_boundary = nil;
+        return_boundary = nil
         json['features'].each do |feature|
           return_boundary = compute_boundary(return_boundary, get_boundary(feature))
         end
         return return_boundary
+
       when 'Feature'
-        return get_boundary(@parsed_json['geometry']);
+        return get_boundary(json['geometry'])
+
       when 'Point'
         return [
           json['coordinates'][0],
@@ -51,18 +55,21 @@ module Geojson2image
           json['coordinates'][1],
           json['coordinates'][1]
         ]
+
       when 'MultiPoint'
         return_boundary = nil
         json['coordinates'].each do |point|
           return_boundary = compute_boundary(return_boundary, [point[0], point[0], point[1], point[1]])
         end
         return return_boundary
+
       when 'LineString'
         return_boundary = nil
         json['coordinates'].each do |point|
           return_boundary = compute_boundary(return_boundary, [point[0], point[0], point[1], point[1]])
         end
         return return_boundary
+
       when 'MultiLineString'
         return_boundary = nil
         json['coordinates'].each do |linestrings|
@@ -71,6 +78,7 @@ module Geojson2image
           end
         end
         return return_boundary
+
       when 'Polygon'
         return_boundary = nil
         json['coordinates'].each do |linestrings|
@@ -79,6 +87,7 @@ module Geojson2image
           end
         end
         return return_boundary
+
       when 'MultiPolygon'
         return_boundary = nil
         json['coordinates'].each do |polygons|
@@ -89,6 +98,7 @@ module Geojson2image
           end
         end
         return return_boundary
+
       else
         puts "Invalid GeoJSON parse error"
       end
@@ -133,21 +143,87 @@ module Geojson2image
         json['geometries'].each do |geometry|
           draw_json(geometry, boundry, options)
         end
+
       when 'FeatureCollection'
-        return_boundary = nil;
+        return_boundary = nil
         json['features'].each do |feature|
           draw_json(feature, boundry)
         end
+
       when 'Feature'
         draw_json(json['geometry'], boundry, json['properties'])
+
       when 'Point'
-        #
+        if options.has_key?("point_background_color")
+          # background_color = imagecolorallocate(gd, options['point_background_color'][0], options['point_background_color'][1], options['point_background_color'][2])
+        else
+          # default red
+          # background_color = imagecolorallocate(gd, 255, 0, 0)
+        end
+
+        if options.has_key?("point_border_color")
+          # border_color = imagecolorallocate(gd, options['point_border_color'][0], options['point_border_color'][1], options['point_border_color'][2])
+        else
+          # border_color = imagecolorallocate(gd, 0, 0, 0)
+        end
+
+        if options.has_key?("point_border_size")
+          border_size = options['point_border_size']
+        else
+          border_size = 1
+        end
+
+        point_size = 10
+        point = json['coordinates']
+        new_point = transform_point(point, boundry)
+        # imagefilledellipse(gd, new_point[0], new_point[1], point_size, point_size, background_color)
+
+        border_size.times do |n|
+          # imageellipse(gd, new_point[0], new_point[1], point_size - 1 + n, point_size - 1 + n, border_color)
+        end
+
       when 'MultiPoint'
-        #
+        json['coordinates'].each do |coordinate|
+          point = {
+            'type': 'Point',
+            'coordinates': coordinate
+          }
+          draw_json(point, boundry, options)
+        end
+
       when 'LineString'
-        #
+        last_point = null
+
+        if options.has_key?("line_border_color")
+          # border_color = imagecolorallocate(gd, options['line_border_color'][0], options['line_border_color'][1], options['line_border_color'][2])
+        else
+          # border_color = imagecolorallocate(gd, 0, 0, 0)
+        end
+
+        if options.has_key?("line_border_size")
+          border_size = options['line_border_size']
+        else
+          border_size = 3
+        end
+
+        json['coordinates'].each do |point|
+          new_point = transform_point(point, boundry)
+          if !last_point.nil?
+            imagesetthickness(gd, border_size)
+            imageline(gd, last_point[0], last_point[1], new_point[0], new_point[1], border_color)
+          end
+          last_point = new_point
+        end
+
       when 'MultiLineString'
-        #
+        json['coordinates'].each do |coordinate|
+          linestring = {
+            'type': 'LineString',
+            'coordinates': coordinate
+          }
+          draw_json(linestring, boundry, options)
+        end
+
       when 'Polygon'
         if options.has_key?("polygon_background_color") && options['polygon_background_color'] != false
           # background_color = imagecolorallocate(gd, options['polygon_background_color'][0], options['polygon_background_color'][1], options['polygon_background_color'][2])
@@ -193,7 +269,7 @@ module Geojson2image
           # end
 
           if !border_size.nil? && !border_size.empty?
-            # imagesetthickness(gd, border_size);
+            # imagesetthickness(gd, border_size)
             # imagepolygon(gd, border_points, border_points.count / 2, border_color)
           end
         end
@@ -201,6 +277,7 @@ module Geojson2image
         if !background_color.nil? && filled_points.count >= 1
           # imagefilledpolygon(gd, filled_points, filled_points.count / 2, background_color)
         end
+
       when 'MultiPolygon'
         json['coordinates'].each do |polygon|
           poly = {
@@ -209,6 +286,7 @@ module Geojson2image
           }
           draw_json(poly, boundry, options)
         end
+
       else
         puts "Invalid GeoJSON parse error"
       end
