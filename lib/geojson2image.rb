@@ -1,16 +1,17 @@
 require "geojson2image/version"
 require "oj"
-require "rmagick"
+require "chunky_png"
 
 module Geojson2image
   class Convert
-    attr_accessor :parsed_json, :width, :height
+    attr_accessor :parsed_json, :width, :height, :output, :png
 
-    def initialize(json: nil, width: nil, height: nil)
+    def initialize(json: nil, width: nil, height: nil, :output: nil)
       begin
         @parsed_json = Oj.load(json)
-        @width = width || 200
-        @height = height || 200
+        @width = width || 500
+        @height = height || 500
+        @output = output || "output.png"
       rescue Oj::ParseError
         puts "GeoJSON parse error"
       end
@@ -293,8 +294,11 @@ module Geojson2image
     end
 
     def draw
-      boundary = get_boundary(@parsed_json)
+      @png = ChunkyPNG::Image.new(@width, @height, ChunkyPNG::Color::TRANSPARENT)
+      # png[1,1] = ChunkyPNG::Color.rgba(10, 20, 30, 128)
+      # png[2,1] = ChunkyPNG::Color('black @ 0.5')
 
+      boundary = get_boundary(@parsed_json)
       boundary[4] = 0
 
       if boundary[1] > boundary[0]
@@ -308,6 +312,7 @@ module Geojson2image
         draw_json(@parsed_json, boundary)
       end
 
+      @png.save(@output, :interlace => true)
     end
 
   end
