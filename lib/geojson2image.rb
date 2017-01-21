@@ -143,7 +143,7 @@ module Geojson2image
       return new_point
     end
 
-    def draw_json(json, boundary, options = {})
+    def draw(json, boundary, options = {})
       x_delta = boundary[1] - boundary[0]
       y_delta = boundary[3] - boundary[2]
       max_delta = [x_delta, y_delta].max
@@ -151,20 +151,20 @@ module Geojson2image
       case json['type']
       when 'GeometryCollection'
         json['geometries'].each do |geometry|
-          draw_json(geometry, boundary, options)
+          draw(geometry, boundary, options)
         end
-        puts "draw_json - GeometryCollection" # DEBUG
+        puts "draw - GeometryCollection" # DEBUG
 
       when 'FeatureCollection'
         return_boundary = nil
         json['features'].each do |feature|
-          draw_json(feature, boundary)
+          draw(feature, boundary)
         end
-        puts "draw_json - FeatureCollection" # DEBUG
+        puts "draw - FeatureCollection" # DEBUG
 
       when 'Feature'
-        draw_json(json['geometry'], boundary, json['properties'])
-        puts "draw_json - Feature" # DEBUG
+        draw(json['geometry'], boundary, json['properties'])
+        puts "draw - Feature" # DEBUG
 
       when 'Point'
         if !options.nil? && options.has_key?("point_background_color")
@@ -194,7 +194,7 @@ module Geojson2image
         border_size.times do |n|
           # imageellipse(gd, new_point[0], new_point[1], point_size - 1 + n, point_size - 1 + n, border_color)
         end
-        puts "draw_json - Point" # DEBUG
+        puts "draw - Point" # DEBUG
 
       when 'MultiPoint'
         json['coordinates'].each do |coordinate|
@@ -202,8 +202,8 @@ module Geojson2image
             'type': 'Point',
             'coordinates': coordinate
           }
-          draw_json(point, boundary, options)
-          puts "draw_json - MultiPoint" # DEBUG
+          draw(point, boundary, options)
+          puts "draw - MultiPoint" # DEBUG
         end
 
       when 'LineString'
@@ -229,7 +229,7 @@ module Geojson2image
           end
           last_point = new_point
         end
-        puts "draw_json - LineString" # DEBUG
+        puts "draw - LineString" # DEBUG
 
       when 'MultiLineString'
         json['coordinates'].each do |coordinate|
@@ -237,9 +237,9 @@ module Geojson2image
             'type': 'LineString',
             'coordinates': coordinate
           }
-          draw_json(linestring, boundary, options)
+          draw(linestring, boundary, options)
         end
-        puts "draw_json - MultiLineString" # DEBUG
+        puts "draw - MultiLineString" # DEBUG
 
       when 'Polygon'
         if !options.nil? && options.has_key?("polygon_background_color") && options['polygon_background_color'] != false
@@ -295,7 +295,7 @@ module Geojson2image
         #if !background_color.nil? && filled_points.count >= 1
           # imagefilledpolygon(gd, filled_points, filled_points.count / 2, background_color)
         #end
-        puts "draw_json - Polygon" # DEBUG
+        puts "draw - Polygon" # DEBUG
 
       when 'MultiPolygon'
         json['coordinates'].each do |polygon|
@@ -303,30 +303,30 @@ module Geojson2image
             "type" => "Polygon",
             "coordinates" => polygon
           }
-          draw_json(poly, boundary, options)
+          draw(poly, boundary, options)
         end
-        puts "draw_json - MultiPolygon" # DEBUG
+        puts "draw - MultiPolygon" # DEBUG
 
       else
-        puts "draw_json invalid GeoJSON parse error - #{json['type']}"
+        puts "draw invalid GeoJSON parse error - #{json['type']}"
       end
     end
 
-    def draw
+    def to_image
       @png = ChunkyPNG::Image.new(@width, @height, ChunkyPNG::Color::TRANSPARENT)
 
       boundary = get_boundary(@parsed_json)
       boundary[4] = 0
 
       if boundary[1] > boundary[0]
-        draw_json(@parsed_json, boundary)
+        draw(@parsed_json, boundary)
       else
         boundary[1] += 360
-        draw_json(@parsed_json, boundary)
+        draw(@parsed_json, boundary)
 
         boundary[1] -= 360
         boundary[0] -= 360
-        draw_json(@parsed_json, boundary)
+        draw(@parsed_json, boundary)
       end
 
       @png.save(@output, :interlace => true)

@@ -20,7 +20,18 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Initialize new Geojson2image::Convert object and call to_image
+```ruby
+gjson = '{"type":"Feature","geometry":{"type":"MultiPolygon","coordinates":[......'
+g2i = Geojson2image::Convert.new(
+  json: gjson,
+  width: 500,
+  height: 500,
+  output: "output.png"
+)
+g2i.to_image
+# => #<File:output.png (closed)>
+```
 
 ## Development
 
