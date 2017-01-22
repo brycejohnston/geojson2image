@@ -199,8 +199,8 @@ module Geojson2image
       when 'MultiPoint'
         json['coordinates'].each do |coordinate|
           point = {
-            'type': 'Point',
-            'coordinates': coordinate
+            "type" => "Point",
+            "coordinates" => coordinate
           }
           draw(point, boundary, options)
           puts "draw - MultiPoint" # DEBUG
@@ -233,8 +233,8 @@ module Geojson2image
       when 'MultiLineString'
         json['coordinates'].each do |coordinate|
           linestring = {
-            'type': 'LineString',
-            'coordinates': coordinate
+            "type" => "LineString",
+            "coordinates" => coordinate
           }
           draw(linestring, boundary, options)
         end
@@ -275,8 +275,9 @@ module Geojson2image
             filled_points << new_point[1].floor
           end
 
-          fill_color = ChunkyPNG::Color.rgba(0, 184, 46, 30)
-          @png.polygon(border_points, ChunkyPNG::Color::BLACK, fill_color)
+          stroke_color = ChunkyPNG::Color.rgb(0, 107, 27) # dark green
+          fill_color = ChunkyPNG::Color.rgba(0, 158, 40, 60) # med green
+          @png.polygon(border_points, stroke_color, fill_color)
         end
         puts "draw - Polygon" # DEBUG
 
