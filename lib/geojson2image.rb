@@ -4,13 +4,15 @@ require "chunky_png"
 
 module Geojson2image
   class Convert
-    attr_accessor :parsed_json, :width, :height, :output, :png
+    attr_accessor :parsed_json, :png_width, :png_height, :width, :height, :output, :png
 
     def initialize(json: nil, width: nil, height: nil, output: nil)
       begin
         @parsed_json = Oj.load(json)
-        @width = width || 500
-        @height = height || 500
+        @png_width = width || 500
+        @png_height = height || 500
+        @width = (@png_width * 0.9).to_i
+        @height = (@png_height * 0.9).to_i
         @output = output || "output.png"
       rescue Oj::ParseError
         puts "GeoJSON parse error"
@@ -137,8 +139,8 @@ module Geojson2image
       y_delta = pixel_y(boundary[3]) - pixel_y(boundary[2])
 
       new_point = []
-      new_point[0] = ((pixel_x(adjust_point(point[0]) + boundary[4]) - pixel_x(adjust_point(boundary[0]) + boundary[4])) * width / x_delta).floor
-      new_point[1] = ((pixel_y(boundary[3]) - pixel_y(point[1])) * height / y_delta).floor
+      new_point[0] = ((pixel_x(adjust_point(point[0]) + boundary[4]) - pixel_x(adjust_point(boundary[0]) + boundary[4])) * width / x_delta).floor + (@width * 0.05)
+      new_point[1] = ((pixel_y(boundary[3]) - pixel_y(point[1])) * height / y_delta).floor + (@height * 0.05)
 
       return new_point
     end
@@ -168,16 +170,14 @@ module Geojson2image
 
       when 'Point'
         if !options.nil? && options.has_key?("point_background_color")
-          # background_color = imagecolorallocate(gd, options['point_background_color'][0], options['point_background_color'][1], options['point_background_color'][2])
-        else
-          # default red
-          # background_color = imagecolorallocate(gd, 255, 0, 0)
+          # background_color = ""
+          # background_color = ChunkyPNG::Color::BLACK
         end
 
         if !options.nil? && options.has_key?("point_border_color")
-          # border_color = imagecolorallocate(gd, options['point_border_color'][0], options['point_border_color'][1], options['point_border_color'][2])
+          # border_color = ""
         else
-          # border_color = imagecolorallocate(gd, 0, 0, 0)
+          # border_color = ChunkyPNG::Color::BLACK
         end
 
         if !options.nil? && options.has_key?("point_border_size")
@@ -210,9 +210,9 @@ module Geojson2image
         last_point = null
 
         if !options.nil? && options.has_key?("line_border_color")
-          # border_color = imagecolorallocate(gd, options['line_border_color'][0], options['line_border_color'][1], options['line_border_color'][2])
+          # border_color = ""
         else
-          # border_color = imagecolorallocate(gd, 0, 0, 0)
+          # border_color = ChunkyPNG::Color::BLACK
         end
 
         if !options.nil? && options.has_key?("line_border_size")
@@ -224,8 +224,7 @@ module Geojson2image
         json['coordinates'].each do |point|
           new_point = transform_point(point, boundary)
           if !last_point.nil?
-            imagesetthickness(gd, border_size)
-            imageline(gd, last_point[0], last_point[1], new_point[0], new_point[1], border_color)
+            @png.line_xiaolin_wu(last_point[0], last_point[1], new_point[0], new_point[1], stroke_color = ChunkyPNG::Color::BLACK)
           end
           last_point = new_point
         end
@@ -243,22 +242,22 @@ module Geojson2image
 
       when 'Polygon'
         if !options.nil? && options.has_key?("polygon_background_color") && options['polygon_background_color'] != false
-          # background_color = imagecolorallocate(gd, options['polygon_background_color'][0], options['polygon_background_color'][1], options['polygon_background_color'][2])
+          # background_color = ""
         else
           # no color if no polygon_background_color
           # background_color = nil
         end
 
         if !options.nil? && options.has_key?("polygon_border_color")
-          # border_color = imagecolorallocate(gd, options['polygon_border_color'][0], options['polygon_border_color'][1], options['polygon_border_color'][2])
+          # border_color = ""
         else
-          # border_color = imagecolorallocate(gd, 0, 0, 0)
+          # border_color = ChunkyPNG::Color::BLACK
         end
 
         if !options.nil? && options.has_key?("polygon_border_size")
-          border_size = options['polygon_border_size']
+          # border_size = options['polygon_border_size']
         else
-          border_size = 6
+          # border_size = 6
         end
 
         filled_points = []
@@ -268,11 +267,6 @@ module Geojson2image
             linestrings << linestrings[0]
           end
 
-          # if linestrings.count <= 3
-            # skip 2 points
-            # continue 2
-          # end
-
           linestrings.each do |point|
             new_point = transform_point(point, boundary)
             border_points << new_point[0].floor
@@ -281,20 +275,9 @@ module Geojson2image
             filled_points << new_point[1].floor
           end
 
-          # if border_points.count < 3
-            # continue
-          # end
-
-          if !border_size.nil?
-            # imagesetthickness(gd, border_size)
-            # imagepolygon(gd, border_points, border_points.count / 2, border_color)
-            @png.polygon(border_points, stroke_color = ChunkyPNG::Color::BLACK, fill_color = ChunkyPNG::Color::TRANSPARENT)
-          end
+          fill_color = ChunkyPNG::Color.rgba(0, 184, 46, 30)
+          @png.polygon(border_points, ChunkyPNG::Color::BLACK, fill_color)
         end
-
-        #if !background_color.nil? && filled_points.count >= 1
-          # imagefilledpolygon(gd, filled_points, filled_points.count / 2, background_color)
-        #end
         puts "draw - Polygon" # DEBUG
 
       when 'MultiPolygon'
@@ -313,7 +296,7 @@ module Geojson2image
     end
 
     def to_image
-      @png = ChunkyPNG::Image.new(@width, @height, ChunkyPNG::Color::TRANSPARENT)
+      @png = ChunkyPNG::Image.new(@png_width, @png_height, ChunkyPNG::Color::WHITE)
 
       boundary = get_boundary(@parsed_json)
       boundary[4] = 0
@@ -330,10 +313,6 @@ module Geojson2image
       end
 
       @png.save(@output, :interlace => true)
-    end
-
-    def test
-      @parsed_json.inspect
     end
 
   end
