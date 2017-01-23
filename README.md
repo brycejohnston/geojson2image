@@ -4,7 +4,7 @@ Ruby library for generating images from GeoJSON
 
 ## Installation
 
-Add this line to your application's Gemfile:
+You will need ImageMagick installed. Then Add this line to your application's Gemfile:
 
 ```ruby
 gem 'geojson2image'
@@ -27,7 +27,7 @@ g2i = Geojson2image::Convert.new(
   json: gjson,
   width: 500,
   height: 500,
-  output: "output.png"
+  output: "output.jpg"
 )
 g2i.to_image
 # => #<File:output.png (closed)>
