@@ -1,19 +1,19 @@
 require "geojson2image/version"
 require "oj"
-require "chunky_png"
+require "mini_magick"
 
 module Geojson2image
   class Convert
-    attr_accessor :parsed_json, :png_width, :png_height, :width, :height, :output, :png
+    attr_accessor :parsed_json, :img_width, :img_height, :width, :height, :output, :canvas
 
     def initialize(json: nil, width: nil, height: nil, output: nil)
       begin
         @parsed_json = Oj.load(json)
-        @png_width = width || 500
-        @png_height = height || 500
-        @width = (@png_width * 0.9).to_i
-        @height = (@png_height * 0.9).to_i
-        @output = output || "output.png"
+        @img_width = width || 500
+        @img_height = height || 500
+        @width = (@img_width * 0.9).to_i
+        @height = (@img_height * 0.9).to_i
+        @output = output || "output.jpg"
       rescue Oj::ParseError
         puts "GeoJSON parse error"
       end
@@ -260,7 +260,6 @@ module Geojson2image
           # border_size = 6
         end
 
-        filled_points = []
         json['coordinates'].each do |linestrings|
           border_points = []
           if linestrings[0] != linestrings[linestrings.count - 1]
@@ -269,17 +268,11 @@ module Geojson2image
 
           linestrings.each do |point|
             new_point = transform_point(point, boundary)
-            border_points << new_point[0].floor
-            filled_points << new_point[0].floor
-            border_points << new_point[1].floor
-            filled_points << new_point[1].floor
+            border_points << "#{new_point[0].floor},#{new_point[1].floor}"
           end
 
-
-
-          stroke_color = ChunkyPNG::Color.rgb(0, 107, 27) # dark green
-          fill_color = ChunkyPNG::Color.rgba(0, 158, 40, 60) # med green
-          @png.polygon(border_points, stroke_color, fill_color)
+          border = "polygon " + border_points.join(", ")
+          @convert.draw(border)
         end
         puts "draw - Polygon" # DEBUG
 
@@ -299,7 +292,12 @@ module Geojson2image
     end
 
     def to_image
-      @png = ChunkyPNG::Image.new(@png_width, @png_height, ChunkyPNG::Color::WHITE)
+      @convert = MiniMagick::Tool::Convert.new
+      @convert.size("#{@img_width}x#{@img_height}")
+      @convert.xc('white')
+      @convert.fill('rgba(0, 158, 40, 0.3)')
+      @convert.stroke('rgb(0, 107, 27)')
+      @convert.strokewidth(4)
 
       boundary = get_boundary(@parsed_json)
       boundary[4] = 0
@@ -315,7 +313,8 @@ module Geojson2image
         draw(@parsed_json, boundary)
       end
 
-      @png.save(@output, :interlace => true)
+      @convert << @output
+      @convert.call
     end
 
   end
