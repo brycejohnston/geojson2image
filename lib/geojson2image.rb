@@ -275,6 +275,8 @@ module Geojson2image
             filled_points << new_point[1].floor
           end
 
+
+
           stroke_color = ChunkyPNG::Color.rgb(0, 107, 27) # dark green
           fill_color = ChunkyPNG::Color.rgba(0, 158, 40, 60) # med green
           @png.polygon(border_points, stroke_color, fill_color)
