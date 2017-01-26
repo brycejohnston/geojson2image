@@ -39,7 +39,6 @@ module Geojson2image
         json['geometries'].each do |geometry|
           return_boundary = compute_boundary(return_boundary, get_boundary(geometry))
         end
-        puts "get_boundary - GeometryCollection" # DEBUG
         return return_boundary
 
       when 'FeatureCollection'
@@ -47,15 +46,12 @@ module Geojson2image
         json['features'].each do |feature|
           return_boundary = compute_boundary(return_boundary, get_boundary(feature))
         end
-        puts "get_boundary - FeatureCollection" # DEBUG
         return return_boundary
 
       when 'Feature'
-        puts "get_boundary - Feature" # DEBUG
         return get_boundary(json['geometry'])
 
       when 'Point'
-        puts "get_boundary - Point" # DEBUG
         return [
           json['coordinates'][0],
           json['coordinates'][0],
@@ -68,7 +64,6 @@ module Geojson2image
         json['coordinates'].each do |point|
           return_boundary = compute_boundary(return_boundary, [point[0], point[0], point[1], point[1]])
         end
-        puts "get_boundary - MultiPoint" # DEBUG
         return return_boundary
 
       when 'LineString'
@@ -76,7 +71,6 @@ module Geojson2image
         json['coordinates'].each do |point|
           return_boundary = compute_boundary(return_boundary, [point[0], point[0], point[1], point[1]])
         end
-        puts "get_boundary - LineString" # DEBUG
         return return_boundary
 
       when 'MultiLineString'
@@ -86,7 +80,6 @@ module Geojson2image
             return_boundary = compute_boundary(return_boundary, [point[0], point[0], point[1], point[1]])
           end
         end
-        puts "get_boundary - MultiLineString" # DEBUG
         return return_boundary
 
       when 'Polygon'
@@ -96,7 +89,6 @@ module Geojson2image
             return_boundary = compute_boundary(return_boundary, [point[0], point[0], point[1], point[1]])
           end
         end
-        puts "get_boundary - Polygon" # DEBUG
         return return_boundary
 
       when 'MultiPolygon'
@@ -108,7 +100,6 @@ module Geojson2image
             end
           end
         end
-        puts "get_boundary - MultiPolygon" # DEBUG
         return return_boundary
 
       else
@@ -155,29 +146,25 @@ module Geojson2image
         json['geometries'].each do |geometry|
           draw(geometry, boundary, options)
         end
-        puts "draw - GeometryCollection" # DEBUG
 
       when 'FeatureCollection'
         return_boundary = nil
         json['features'].each do |feature|
           draw(feature, boundary)
         end
-        puts "draw - FeatureCollection" # DEBUG
 
       when 'Feature'
         draw(json['geometry'], boundary, json['properties'])
-        puts "draw - Feature" # DEBUG
 
       when 'Point'
         if !options.nil? && options.has_key?("point_background_color")
-          # background_color = ""
-          # background_color = ChunkyPNG::Color::BLACK
+
         end
 
         if !options.nil? && options.has_key?("point_border_color")
-          # border_color = ""
+
         else
-          # border_color = ChunkyPNG::Color::BLACK
+
         end
 
         if !options.nil? && options.has_key?("point_border_size")
@@ -194,7 +181,6 @@ module Geojson2image
         border_size.times do |n|
           # imageellipse(gd, new_point[0], new_point[1], point_size - 1 + n, point_size - 1 + n, border_color)
         end
-        puts "draw - Point" # DEBUG
 
       when 'MultiPoint'
         json['coordinates'].each do |coordinate|
@@ -203,16 +189,15 @@ module Geojson2image
             "coordinates" => coordinate
           }
           draw(point, boundary, options)
-          puts "draw - MultiPoint" # DEBUG
         end
 
       when 'LineString'
         last_point = null
 
         if !options.nil? && options.has_key?("line_border_color")
-          # border_color = ""
+
         else
-          # border_color = ChunkyPNG::Color::BLACK
+
         end
 
         if !options.nil? && options.has_key?("line_border_size")
@@ -228,7 +213,6 @@ module Geojson2image
           end
           last_point = new_point
         end
-        puts "draw - LineString" # DEBUG
 
       when 'MultiLineString'
         json['coordinates'].each do |coordinate|
@@ -238,26 +222,24 @@ module Geojson2image
           }
           draw(linestring, boundary, options)
         end
-        puts "draw - MultiLineString" # DEBUG
 
       when 'Polygon'
         if !options.nil? && options.has_key?("polygon_background_color") && options['polygon_background_color'] != false
-          # background_color = ""
+
         else
-          # no color if no polygon_background_color
-          # background_color = nil
+
         end
 
         if !options.nil? && options.has_key?("polygon_border_color")
-          # border_color = ""
+
         else
-          # border_color = ChunkyPNG::Color::BLACK
+
         end
 
         if !options.nil? && options.has_key?("polygon_border_size")
-          # border_size = options['polygon_border_size']
+
         else
-          # border_size = 6
+
         end
 
         json['coordinates'].each do |linestrings|
@@ -274,7 +256,6 @@ module Geojson2image
           border = "polygon " + border_points.join(", ")
           @convert.draw(border)
         end
-        puts "draw - Polygon" # DEBUG
 
       when 'MultiPolygon'
         json['coordinates'].each do |polygon|
@@ -284,7 +265,6 @@ module Geojson2image
           }
           draw(poly, boundary, options)
         end
-        puts "draw - MultiPolygon" # DEBUG
 
       else
         puts "draw invalid GeoJSON parse error - #{json['type']}"

@@ -30,7 +30,6 @@ g2i = Geojson2image::Convert.new(
   output: "output.jpg"
 )
 g2i.to_image
-# => #<File:output.png (closed)>
 ```
 
 ## Development
