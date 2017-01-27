@@ -4,15 +4,21 @@ require "mini_magick"
 
 module Geojson2image
   class Convert
-    attr_accessor :parsed_json, :img_width, :img_height, :width, :height, :output, :canvas
+    attr_accessor :parsed_json, :img_width, :img_height, :width, :height,
+      :background_color, :border_color, :border_width, :output, :canvas
 
-    def initialize(json: nil, width: nil, height: nil, output: nil)
+    def initialize(json: nil, width: nil, height: nil, background_color: nil,
+      fill_color: nil, stroke_color: nil, stroke_width: nil, output: nil)
       begin
         @parsed_json = Oj.load(json)
         @img_width = width || 500
         @img_height = height || 500
         @width = (@img_width * 0.9).to_i
         @height = (@img_height * 0.9).to_i
+        @background_color = background_color || 'white'
+        @fill_color = fill_color || 'white'
+        @stroke_color = stroke_color || 'black'
+        @stroke_width = stroke_width || 3
         @output = output || "output.jpg"
       rescue Oj::ParseError
         puts "GeoJSON parse error"
@@ -157,22 +163,6 @@ module Geojson2image
         draw(json['geometry'], boundary, json['properties'])
 
       when 'Point'
-        if !options.nil? && options.has_key?("point_background_color")
-
-        end
-
-        if !options.nil? && options.has_key?("point_border_color")
-
-        else
-
-        end
-
-        if !options.nil? && options.has_key?("point_border_size")
-          border_size = options['point_border_size']
-        else
-          border_size = 1
-        end
-
         point_size = 10
         point = json['coordinates']
         new_point = transform_point(point, boundary)
@@ -194,22 +184,10 @@ module Geojson2image
       when 'LineString'
         last_point = null
 
-        if !options.nil? && options.has_key?("line_border_color")
-
-        else
-
-        end
-
-        if !options.nil? && options.has_key?("line_border_size")
-          border_size = options['line_border_size']
-        else
-          border_size = 3
-        end
-
         json['coordinates'].each do |point|
           new_point = transform_point(point, boundary)
           if !last_point.nil?
-            @png.line_xiaolin_wu(last_point[0], last_point[1], new_point[0], new_point[1], stroke_color = ChunkyPNG::Color::BLACK)
+            # @png.line_xiaolin_wu(last_point[0], last_point[1], new_point[0], new_point[1], stroke_color = ChunkyPNG::Color::BLACK)
           end
           last_point = new_point
         end
@@ -224,24 +202,6 @@ module Geojson2image
         end
 
       when 'Polygon'
-        if !options.nil? && options.has_key?("polygon_background_color") && options['polygon_background_color'] != false
-
-        else
-
-        end
-
-        if !options.nil? && options.has_key?("polygon_border_color")
-
-        else
-
-        end
-
-        if !options.nil? && options.has_key?("polygon_border_size")
-
-        else
-
-        end
-
         json['coordinates'].each do |linestrings|
           border_points = []
           if linestrings[0] != linestrings[linestrings.count - 1]
@@ -274,10 +234,10 @@ module Geojson2image
     def to_image
       @convert = MiniMagick::Tool::Convert.new
       @convert.size("#{@img_width}x#{@img_height}")
-      @convert.xc('white')
-      @convert.fill('rgba(0, 158, 40, 0.3)')
-      @convert.stroke('rgb(0, 107, 27)')
-      @convert.strokewidth(4)
+      @convert.xc(@background_color)
+      @convert.fill(@fill_color)
+      @convert.stroke(@stroke_color)
+      @convert.strokewidth(@stroke_width)
 
       boundary = get_boundary(@parsed_json)
       boundary[4] = 0
