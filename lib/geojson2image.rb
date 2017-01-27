@@ -142,7 +142,7 @@ module Geojson2image
       return new_point
     end
 
-    def draw(json, boundary, options = {})
+    def draw(json, boundary)
       x_delta = boundary[1] - boundary[0]
       y_delta = boundary[3] - boundary[2]
       max_delta = [x_delta, y_delta].max
@@ -150,7 +150,7 @@ module Geojson2image
       case json['type']
       when 'GeometryCollection'
         json['geometries'].each do |geometry|
-          draw(geometry, boundary, options)
+          draw(geometry, boundary)
         end
 
       when 'FeatureCollection'
@@ -166,11 +166,8 @@ module Geojson2image
         point_size = 10
         point = json['coordinates']
         new_point = transform_point(point, boundary)
-        # imagefilledellipse(gd, new_point[0], new_point[1], point_size, point_size, background_color)
-
-        border_size.times do |n|
-          # imageellipse(gd, new_point[0], new_point[1], point_size - 1 + n, point_size - 1 + n, border_color)
-        end
+        draw_point = "color #{new_point[0]},#{new_point[1]} point"
+        @convert.draw(draw_point)
 
       when 'MultiPoint'
         json['coordinates'].each do |coordinate|
@@ -178,7 +175,7 @@ module Geojson2image
             "type" => "Point",
             "coordinates" => coordinate
           }
-          draw(point, boundary, options)
+          draw(point, boundary)
         end
 
       when 'LineString'
@@ -187,7 +184,8 @@ module Geojson2image
         json['coordinates'].each do |point|
           new_point = transform_point(point, boundary)
           if !last_point.nil?
-            # @png.line_xiaolin_wu(last_point[0], last_point[1], new_point[0], new_point[1], stroke_color = ChunkyPNG::Color::BLACK)
+            polyline = "polyline #{last_point[0]},#{last_point[1]}, #{new_point[0]},#{new_point[1]}"
+            @convert.draw(polyline)
           end
           last_point = new_point
         end
@@ -198,7 +196,7 @@ module Geojson2image
             "type" => "LineString",
             "coordinates" => coordinate
           }
-          draw(linestring, boundary, options)
+          draw(linestring, boundary)
         end
 
       when 'Polygon'
@@ -223,7 +221,7 @@ module Geojson2image
             "type" => "Polygon",
             "coordinates" => polygon
           }
-          draw(poly, boundary, options)
+          draw(poly, boundary)
         end
 
       else

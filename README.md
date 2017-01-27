@@ -1,7 +1,7 @@
 # geojson2image
 
 Ruby library for generating images from GeoJSON.
-This gem is currently is in alpha / pre-release level status (not fully functional).
+This gem currently is in alpha / pre-release level status (not fully functional).
 
 ## Installation
 
