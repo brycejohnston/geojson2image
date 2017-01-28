@@ -191,11 +191,11 @@ module Geojson2image
 
           linestrings.each do |point|
             new_point = transform_point(point)
-            puts "#{point[0]},#{point[1]} => #{new_point[0]},#{new_point[1]}"
             border_points << "#{new_point[0]},#{new_point[1]}"
           end
 
           border = "polygon " + border_points.join(", ")
+          puts border
           @convert.draw(border)
         end
 
@@ -239,7 +239,8 @@ module Geojson2image
       draw(@parsed_json)
 
       @convert << @output
-      @convert.call
+      cmd_string = @convert.call
+      puts cmd_string
     end
 
   end
