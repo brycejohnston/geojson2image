@@ -91,26 +91,24 @@ module Geojson2image
     def get_boundary
       quarter_pi = Math::PI / 4.0
 
-      @coordinates.each do |point|
-        lon = point[0].to_f * Math::PI / 180
-        lat = point[1].to_f * Math::PI / 180
+      @coordinates.each_with_index do |point,i|
+        lon = @coordinates[i][0].to_f * Math::PI / 180
+        lat = @coordinates[i][1].to_f * Math::PI / 180
 
-        xy = []
-        xy[0] = lon
-        xy[1] = Math.log(Math.tan(quarter_pi + 0.5 * lat))
+        @coordinates[i][0] = lon
+        @coordinates[i][1] = Math.log(Math.tan(quarter_pi + 0.5 * lat))
 
-        @min_xy[0] = (min_xy[0] == -1 ? xy[0] : [min_xy[0], xy[0]].min)
-        @min_xy[1] = (min_xy[1] == -1 ? xy[1] : [min_xy[1], xy[1]].min)
+        @min_xy[0] = (min_xy[0] == -1 ? @coordinates[i][0] : [min_xy[0], @coordinates[i][0]].min)
+        @min_xy[1] = (min_xy[1] == -1 ? @coordinates[i][1] : [min_xy[1], @coordinates[i][1]].min)
       end
 
-      @coordinates.each do |point|
-        point[0] = point[0] - @min_xy[0]
-        point[1] = point[1] - @min_xy[1]
+      @coordinates.each_with_index do |point,i|
+        @coordinates[i][0] = @coordinates[i][0] - @min_xy[0]
+        @coordinates[i][1] = @coordinates[i][1] - @min_xy[1]
 
-        @max_xy[0] = (max_xy[0] == -1 ? point[0] : [max_xy[0], point[0]].max)
-        @max_xy[1] = (max_xy[1] == -1 ? point[1] : [max_xy[1], point[1]].max)
+        @max_xy[0] = (max_xy[0] == -1 ? @coordinates[i][0] : [max_xy[0], @coordinates[i][0]].max)
+        @max_xy[1] = (max_xy[1] == -1 ? @coordinates[i][1] : [max_xy[1], @coordinates[i][1]].max)
       end
-
     end
 
     def transform_point(point)
@@ -124,8 +122,8 @@ module Geojson2image
       val = Math.log(Math.tan(quarter_pi + 0.5 * lat))
       xy[1] = val - @min_xy[1]
 
-      xy[0] = @width_padding + (xy[0] * @global_ratio)
-      xy[1] = @height - @height_padding - (xy[1] * @global_ratio)
+      xy[0] = (@width_padding + (xy[0] * @global_ratio)).to_i
+      xy[1] = (@height - @height_padding - (xy[1] * @global_ratio)).to_i
 
       return xy
     end
@@ -195,7 +193,6 @@ module Geojson2image
           end
 
           border = "polygon " + border_points.join(", ")
-          puts border
           @convert.draw(border)
         end
 
@@ -233,14 +230,13 @@ module Geojson2image
       map_height_ratio = map_height / @max_xy[1]
 
       @global_ratio = [map_width_ratio, map_height_ratio].min
-      @width_padding = (@width - (@global_ratio * @max_xy[0])) / 2.0
-      @height_padding = (@height - (@global_ratio * @max_xy[1])) / 2.0
+      @width_padding = (@width - (@global_ratio * @max_xy[0])) / 2
+      @height_padding = (@height - (@global_ratio * @max_xy[1])) / 2
 
       draw(@parsed_json)
 
       @convert << @output
       cmd_string = @convert.call
-      puts cmd_string
     end
 
   end
