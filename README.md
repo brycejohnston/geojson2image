@@ -1,11 +1,11 @@
 # geojson2image
 
 Ruby library for generating images from GeoJSON.
-This gem currently is in alpha / pre-release level status (not fully functional).
+This gem is currently alpha / pre-release stage.
 
 ## Installation
 
-You will need ImageMagick installed. Then Add this line to your application's Gemfile:
+You will need [ImageMagick](http://imagemagick.org/) installed. Then Add this line to your application's Gemfile:
 
 ```ruby
 gem 'geojson2image'
@@ -28,6 +28,7 @@ g2i = Geojson2image::Convert.new(
   json: gjson,
   width: 500,
   height: 500,
+  padding: 50,
   background_color: 'white',
   fill_color: 'rgba(0, 158, 40, 0.3)',
   stroke_color: 'rgb(0, 107, 27)',
