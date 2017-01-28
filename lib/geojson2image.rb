@@ -84,7 +84,7 @@ module Geojson2image
         end
 
       else
-        puts "get_boundary invalid GeoJSON parse error"
+        puts "get_points - invalid GeoJSON parse error"
       end
     end
 
@@ -92,8 +92,8 @@ module Geojson2image
       quarter_pi = Math::PI / 4.0
 
       @coordinates.each_with_index do |point,i|
-        lon = @coordinates[i][0].to_f * Math::PI / 180
-        lat = @coordinates[i][1].to_f * Math::PI / 180
+        lon = @coordinates[i][0] * Math::PI / 180
+        lat = @coordinates[i][1] * Math::PI / 180
 
         @coordinates[i][0] = lon
         @coordinates[i][1] = Math.log(Math.tan(quarter_pi + 0.5 * lat))
@@ -206,7 +206,7 @@ module Geojson2image
         end
 
       else
-        puts "draw invalid GeoJSON parse error - #{json['type']}"
+        puts "draw - invalid GeoJSON parse error - #{json['type']}"
       end
     end
 
@@ -236,7 +236,7 @@ module Geojson2image
       draw(@parsed_json)
 
       @convert << @output
-      cmd_string = @convert.call
+      @convert.call
     end
 
   end
