@@ -43,14 +43,19 @@ g2i = Geojson2image::Convert.new(
 g2i.to_image
 ```
 
-### Example Output
+**Example Output**
+
 ![Example Output](example/example_output.jpg?raw=true "Example Output")
 
 ### Stroke and Fill Color Options
 
-These options can be globally set when initializing a
-new Geojson2image::Convert object, or you can override them by adding properties to
-your GeoJSON that include the desired stroke and fill options per feature. Example:
+Valid color values are defined in the ImageMagick Color Names Reference:
+https://www.imagemagick.org/script/color.php
+
+Stroke and fill color options can be globally set when initializing a
+new Geojson2image::Convert object, or you can override them by adding
+properties to your GeoJSON that include the desired stroke and fill options per
+feature. Example:
 
 ```json
 "properties": {
@@ -59,9 +64,9 @@ your GeoJSON that include the desired stroke and fill options per feature. Examp
   "stoke_width": "3",
 },
 ```
+**Example Output**
 
-Valid color values are defined in the ImageMagick Color Names Reference:
-https://www.imagemagick.org/script/color.php
+![Example Output](example/fill_options_example.jpg?raw=true "Fill Options Example Output")
 
 ## Development
 
