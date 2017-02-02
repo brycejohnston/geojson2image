@@ -128,7 +128,7 @@ module Geojson2image
       return xy
     end
 
-    def draw(json)
+    def draw(json, properties = nil)
       case json['type']
       when 'GeometryCollection'
         json['geometries'].each do |geometry|
@@ -142,7 +142,11 @@ module Geojson2image
         end
 
       when 'Feature'
-        draw(json['geometry'])
+        if json.key?('properties')
+          draw(json['geometry'], json['properties'])
+        else
+          draw(json['geometry'])
+        end
 
       when 'Point'
         point = json['coordinates']
@@ -160,6 +164,18 @@ module Geojson2image
         end
 
       when 'LineString'
+        if !properties.nil?
+          if properties.key?('fill_color')
+            @convert.fill(properties['fill_color'])
+          end
+          if properties.key?('stroke_color')
+            @convert.stroke(properties['stroke_color'])
+          end
+          if properties.key?('stroke_width')
+            @convert.strokewidth(properties['stroke_width'])
+          end
+        end
+
         last_point = null
 
         json['coordinates'].each do |point|
@@ -181,6 +197,18 @@ module Geojson2image
         end
 
       when 'Polygon'
+        if !properties.nil?
+          if properties.key?('fill_color')
+            @convert.fill(properties['fill_color'])
+          end
+          if properties.key?('stroke_color')
+            @convert.stroke(properties['stroke_color'])
+          end
+          if properties.key?('stroke_width')
+            @convert.strokewidth(properties['stroke_width'])
+          end
+        end
+
         json['coordinates'].each do |linestrings|
           border_points = []
           if linestrings[0] != linestrings[linestrings.count - 1]

@@ -6,7 +6,7 @@
 
 Ruby library for generating images from GeoJSON.
 
-Currently, MultiPolygon and Polygon GeoJSON types should output images properly. Other GeoJSON types have not been thoroughly tested, and properties from the GeoJSON are not being parsed. 
+Currently, MultiPolygon and Polygon GeoJSON types should output images properly. Other GeoJSON types have not been thoroughly tested.
 
 ## Installation
 
@@ -46,9 +46,22 @@ g2i.to_image
 ### Example Output
 ![Example Output](example/example_output.jpg?raw=true "Example Output")
 
-### Color Options
+### Stroke and Fill Color Options
 
-ImageMagick Color Names Reference: https://www.imagemagick.org/script/color.php
+These options can be globally set when initializing a
+new Geojson2image::Convert object, or you can override them by adding properties to
+your GeoJSON that include the desired stroke and fill options per feature. Example:
+
+```json
+"properties": {
+  "fill_color": "rgba(0, 158, 40, 0.3)",
+  "stroke_color": "rgb(0, 107, 27)",
+  "stoke_width": "3",
+},
+```
+
+Valid color values are defined in the ImageMagick Color Names Reference:
+https://www.imagemagick.org/script/color.php
 
 ## Development
 
