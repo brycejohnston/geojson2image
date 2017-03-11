@@ -7,11 +7,11 @@ Gem::Specification.new do |spec|
   spec.name          = "geojson2image"
   spec.version       = Geojson2image::VERSION
   spec.authors       = ["Bryce Johnston"]
-  spec.email         = ["bjohnston@cropquest.com"]
+  spec.email         = ["johnstonbrc@gmail.com"]
 
   spec.summary       = %q{Ruby library for generating images from GeoJSON}
   spec.description   = %q{Ruby library for generating images from GeoJSON}
-  spec.homepage      = "https://github.com/CropQuest/geojson2image"
+  spec.homepage      = "https://github.com/brycejohnston/geojson2image"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
