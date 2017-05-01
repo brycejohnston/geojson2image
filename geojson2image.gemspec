@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{Ruby library for generating images from GeoJSON}
   spec.description   = %q{Ruby library for generating images from GeoJSON}
-  spec.homepage      = "https://github.com/brycejohnston/geojson2image"
+  spec.homepage      = "https://github.com/beaorn/geojson2image"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "oj", "~> 3.0"
-  spec.add_dependency "mini_magick", "~> 4.6.0"
+  spec.add_dependency "mini_magick", "~> 4.6"
   spec.add_development_dependency "bundler", "~> 1.13"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
