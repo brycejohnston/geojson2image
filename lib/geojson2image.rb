@@ -198,13 +198,13 @@ module Geojson2image
 
       when 'Polygon'
         if !properties.nil?
-          if properties.key?('fill_color')
+          if properties.key?('fill_color') && !properties['fill_color'].nil?
             @convert.fill(properties['fill_color'])
           end
-          if properties.key?('stroke_color')
+          if properties.key?('stroke_color') && !properties['stroke_color'].nil?
             @convert.stroke(properties['stroke_color'])
           end
-          if properties.key?('stroke_width')
+          if properties.key?('stroke_width') && !properties['stroke_width'].nil?
             @convert.strokewidth(properties['stroke_width'])
           end
         end
