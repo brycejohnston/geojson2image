@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{Ruby library for generating images from GeoJSON}
   spec.description   = %q{Ruby library for generating images from GeoJSON}
-  spec.homepage      = "https://github.com/CropQuest/geojson2image"
+  spec.homepage      = "https://github.com/beaorn/geojson2image"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
