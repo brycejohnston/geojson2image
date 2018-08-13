@@ -4,13 +4,13 @@
 
 [gem]: https://rubygems.org/gems/geojson2image
 
-Ruby library for generating images from GeoJSON.
+Ruby library for generating images from GeoJSON using the [ChunkyPNG library](https://github.com/wvanbergen/chunky_png).
 
 Currently, MultiPolygon and Polygon GeoJSON types should output images properly. Other GeoJSON types have not been thoroughly tested.
 
 ## Installation
 
-You will need [ImageMagick](http://imagemagick.org/) installed. Then Add this line to your application's Gemfile:
+Add this line to your application's Gemfile:
 
 ```ruby
 gem 'geojson2image'
@@ -34,10 +34,9 @@ g2i = Geojson2image::Convert.new(
   width: 500,
   height: 500,
   padding: 50,
-  background_color: 'white',
-  fill_color: 'rgba(0, 158, 40, 0.3)',
-  stroke_color: 'rgb(0, 107, 27)',
-  stroke_width: 3,
+  background_color: "#ffffff",
+  fill_color: "#008000",
+  stroke_color: "#006400",
   output: "output.jpg"
 )
 g2i.to_image
@@ -49,8 +48,7 @@ g2i.to_image
 
 ### Stroke and Fill Color Options
 
-Valid color values are defined in the ImageMagick Color Names Reference:
-https://www.imagemagick.org/script/color.php
+Accepts color code hex format
 
 Stroke and fill color options can be globally set when initializing a
 new Geojson2image::Convert object, or you can override them by adding
@@ -59,9 +57,8 @@ feature. Example:
 
 ```json
 "properties": {
-  "fill_color": "rgba(0, 158, 40, 0.3)",
-  "stroke_color": "rgb(0, 107, 27)",
-  "stoke_width": "3",
+  "fill_color": "#008000",
+  "stroke_color": "#006400"
 },
 ```
 **Example Output**
