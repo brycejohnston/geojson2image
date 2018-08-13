@@ -6,8 +6,6 @@
 
 Ruby library for generating images from GeoJSON using the [ChunkyPNG library](https://github.com/wvanbergen/chunky_png).
 
-Currently, MultiPolygon and Polygon GeoJSON types should output images properly. Other GeoJSON types have not been thoroughly tested.
-
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -48,7 +46,7 @@ g2i.to_image
 
 ### Stroke and Fill Color Options
 
-Accepts color code hex format
+Accepts hex color format
 
 Stroke and fill color options can be globally set when initializing a
 new Geojson2image::Convert object, or you can override them by adding

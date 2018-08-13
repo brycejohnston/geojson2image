@@ -1,6 +1,6 @@
 require "geojson2image/version"
 require "oj"
-require "oily_png"
+require "chunky_png"
 
 module Geojson2image
   class Convert
