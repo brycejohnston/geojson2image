@@ -13,9 +13,9 @@ module Geojson2image
         @width = width || 500
         @height = height || 500
         @padding = padding || 50
-        @background_color = ChunkyPNG::Color.from_hex(background_color) ||ChunkyPNG::Color.from_hex("#ffffff")
-        @fill_color = ChunkyPNG::Color.from_hex(fill_color) || ChunkyPNG::Color.from_hex("#000080")
-        @stroke_color = ChunkyPNG::Color.from_hex(stroke_color) || ChunkyPNG::Color.from_hex("#000000")
+        @background_color = (background_color.nil? ? ChunkyPNG::Color.from_hex("#ffffff") : ChunkyPNG::Color.from_hex(background_color))
+        @fill_color = (fill_color.nil? ? ChunkyPNG::Color.from_hex("#000080") : ChunkyPNG::Color.from_hex(fill_color))
+        @stroke_color = (stroke_color.nil? ? ChunkyPNG::Color.from_hex("#000000") : ChunkyPNG::Color.from_hex(stroke_color))
         @output = output || "output.jpg"
         @min_xy = [-1, -1]
         @max_xy = [-1, -1]
