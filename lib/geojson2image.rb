@@ -95,16 +95,16 @@ module Geojson2image
         @coordinates[i][0] = lon
         @coordinates[i][1] = Math.log(Math.tan(quarter_pi + 0.5 * lat))
 
-        @min_xy[0] = (min_xy[0] == -1 ? @coordinates[i][0] : [min_xy[0], @coordinates[i][0]].min)
-        @min_xy[1] = (min_xy[1] == -1 ? @coordinates[i][1] : [min_xy[1], @coordinates[i][1]].min)
+        @min_xy[0] = (@min_xy[0] == -1 ? @coordinates[i][0] : [@min_xy[0], @coordinates[i][0]].min)
+        @min_xy[1] = (@min_xy[1] == -1 ? @coordinates[i][1] : [@min_xy[1], @coordinates[i][1]].min)
       end
 
       @coordinates.each_with_index do |point,i|
         @coordinates[i][0] = @coordinates[i][0] - @min_xy[0]
         @coordinates[i][1] = @coordinates[i][1] - @min_xy[1]
 
-        @max_xy[0] = (max_xy[0] == -1 ? @coordinates[i][0] : [max_xy[0], @coordinates[i][0]].max)
-        @max_xy[1] = (max_xy[1] == -1 ? @coordinates[i][1] : [max_xy[1], @coordinates[i][1]].max)
+        @max_xy[0] = (@max_xy[0] == -1 ? @coordinates[i][0] : [@max_xy[0], @coordinates[i][0]].max)
+        @max_xy[1] = (@max_xy[1] == -1 ? @coordinates[i][1] : [@max_xy[1], @coordinates[i][1]].max)
       end
     end
 

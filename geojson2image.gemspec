@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = "geojson2image"
   spec.version       = Geojson2image::VERSION
   spec.authors       = ["Bryce Johnston"]
-  spec.email         = ["bryce@agdeveloper.com"]
+  spec.email         = ["bryce@beaorn.com"]
 
   spec.summary       = %q{Ruby library for generating images from GeoJSON}
   spec.description   = %q{Ruby library for generating images from GeoJSON}
