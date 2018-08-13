@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = "geojson2image"
   spec.version       = Geojson2image::VERSION
   spec.authors       = ["Bryce Johnston"]
-  spec.email         = ["bryce@agdeveloper.com"]
+  spec.email         = ["bryce@beaorn.com"]
 
   spec.summary       = %q{Ruby library for generating images from GeoJSON}
   spec.description   = %q{Ruby library for generating images from GeoJSON}
@@ -21,8 +21,8 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "oj", "~> 3.0"
-  spec.add_dependency "mini_magick", "~> 4.6"
+  spec.add_dependency "oj", "~> 3.6"
+  spec.add_dependency "chunky_png", "~> 1.3"
   spec.add_development_dependency "bundler", "~> 1.13"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"

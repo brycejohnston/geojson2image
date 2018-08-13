@@ -1,25 +1,21 @@
 require "geojson2image/version"
 require "oj"
-require "mini_magick"
+require "chunky_png"
 
 module Geojson2image
   class Convert
-    attr_accessor :parsed_json, :width, :height, :background_color,
-    :border_color, :border_width, :padding, :output, :min_xy, :max_xy,
-    :coordinates, :width_padding, :height_padding, :global_ratio
 
     def initialize(json: nil, width: nil, height: nil,  padding: nil,
       background_color: nil, fill_color: nil, stroke_color: nil,
-      stroke_width: nil, output: nil)
+      output: nil)
       begin
         @parsed_json = Oj.load(json)
         @width = width || 500
         @height = height || 500
         @padding = padding || 50
-        @background_color = background_color || 'white'
-        @fill_color = fill_color || 'white'
-        @stroke_color = stroke_color || 'black'
-        @stroke_width = stroke_width || 3
+        @background_color = (background_color.nil? ? ChunkyPNG::Color::WHITE : ChunkyPNG::Color.from_hex(background_color))
+        @fill_color = (fill_color.nil? ? ChunkyPNG::Color::TRANSPARENT : ChunkyPNG::Color.from_hex(fill_color))
+        @stroke_color = (stroke_color.nil? ? ChunkyPNG::Color::BLACK : ChunkyPNG::Color.from_hex(stroke_color))
         @output = output || "output.jpg"
         @min_xy = [-1, -1]
         @max_xy = [-1, -1]
@@ -27,6 +23,7 @@ module Geojson2image
         @width_padding = 0
         @height_padding = 0
         @global_ratio = 0
+        @png = ChunkyPNG::Image.new(@width, @height, @background_color)
       rescue Oj::ParseError
         puts "GeoJSON parse error"
       end
@@ -98,16 +95,16 @@ module Geojson2image
         @coordinates[i][0] = lon
         @coordinates[i][1] = Math.log(Math.tan(quarter_pi + 0.5 * lat))
 
-        @min_xy[0] = (min_xy[0] == -1 ? @coordinates[i][0] : [min_xy[0], @coordinates[i][0]].min)
-        @min_xy[1] = (min_xy[1] == -1 ? @coordinates[i][1] : [min_xy[1], @coordinates[i][1]].min)
+        @min_xy[0] = (@min_xy[0] == -1 ? @coordinates[i][0] : [@min_xy[0], @coordinates[i][0]].min)
+        @min_xy[1] = (@min_xy[1] == -1 ? @coordinates[i][1] : [@min_xy[1], @coordinates[i][1]].min)
       end
 
       @coordinates.each_with_index do |point,i|
         @coordinates[i][0] = @coordinates[i][0] - @min_xy[0]
         @coordinates[i][1] = @coordinates[i][1] - @min_xy[1]
 
-        @max_xy[0] = (max_xy[0] == -1 ? @coordinates[i][0] : [max_xy[0], @coordinates[i][0]].max)
-        @max_xy[1] = (max_xy[1] == -1 ? @coordinates[i][1] : [max_xy[1], @coordinates[i][1]].max)
+        @max_xy[0] = (@max_xy[0] == -1 ? @coordinates[i][0] : [@max_xy[0], @coordinates[i][0]].max)
+        @max_xy[1] = (@max_xy[1] == -1 ? @coordinates[i][1] : [@max_xy[1], @coordinates[i][1]].max)
       end
     end
 
@@ -149,10 +146,16 @@ module Geojson2image
         end
 
       when 'Point'
+        tmp_stroke_color = @stroke_color
+        if !properties.nil?
+          if properties.key?('stroke_color') && !properties['stroke_color'].nil?
+            tmp_stroke_color = ChunkyPNG::Color.from_hex(properties['stroke_color'])
+          end
+        end
+
         point = json['coordinates']
         new_point = transform_point(point)
-        draw_point = "color #{new_point[0]},#{new_point[1]} point"
-        @convert.draw(draw_point)
+        @png.compose_pixel(new_point[0], new_point[1], tmp_stroke_color)
 
       when 'MultiPoint'
         json['coordinates'].each do |coordinate|
@@ -164,15 +167,10 @@ module Geojson2image
         end
 
       when 'LineString'
+        tmp_stroke_color = @stroke_color
         if !properties.nil?
-          if properties.key?('fill_color')
-            @convert.fill(properties['fill_color'])
-          end
-          if properties.key?('stroke_color')
-            @convert.stroke(properties['stroke_color'])
-          end
-          if properties.key?('stroke_width')
-            @convert.strokewidth(properties['stroke_width'])
+          if properties.key?('stroke_color') && !properties['stroke_color'].nil?
+            tmp_stroke_color = ChunkyPNG::Color.from_hex(properties['stroke_color'])
           end
         end
 
@@ -181,8 +179,7 @@ module Geojson2image
         json['coordinates'].each do |point|
           new_point = transform_point(point)
           if !last_point.nil?
-            polyline = "polyline #{last_point[0]},#{last_point[1]}, #{new_point[0]},#{new_point[1]}"
-            @convert.draw(polyline)
+            @png.line(last_point[0], last_point[1], new_point[0], new_point[1], tmp_stroke_color)
           end
           last_point = new_point
         end
@@ -197,15 +194,14 @@ module Geojson2image
         end
 
       when 'Polygon'
+        tmp_fill_color = @fill_color
+        tmp_stroke_color = @stroke_color
         if !properties.nil?
           if properties.key?('fill_color') && !properties['fill_color'].nil?
-            @convert.fill(properties['fill_color'])
+            tmp_fill_color = ChunkyPNG::Color.from_hex(properties['fill_color'])
           end
           if properties.key?('stroke_color') && !properties['stroke_color'].nil?
-            @convert.stroke(properties['stroke_color'])
-          end
-          if properties.key?('stroke_width') && !properties['stroke_width'].nil?
-            @convert.strokewidth(properties['stroke_width'])
+            tmp_stroke_color = ChunkyPNG::Color.from_hex(properties['stroke_color'])
           end
         end
 
@@ -220,8 +216,8 @@ module Geojson2image
             border_points << "#{new_point[0]},#{new_point[1]}"
           end
 
-          border = "polygon " + border_points.join(", ")
-          @convert.draw(border)
+          points = ChunkyPNG::Vector.multiple_from_string(border_points.join(", "))
+          @png.polygon(points, tmp_stroke_color, tmp_fill_color)
         end
 
       when 'MultiPolygon'
@@ -239,13 +235,6 @@ module Geojson2image
     end
 
     def to_image
-      @convert = MiniMagick::Tool::Convert.new
-      @convert.size("#{@width}x#{@height}")
-      @convert.xc(@background_color)
-      @convert.fill(@fill_color)
-      @convert.stroke(@stroke_color)
-      @convert.strokewidth(@stroke_width)
-
       get_points(@parsed_json)
       get_boundary
 
@@ -262,9 +251,7 @@ module Geojson2image
       @height_padding = (@height - (@global_ratio * @max_xy[1])) / 2
 
       draw(@parsed_json)
-
-      @convert << @output
-      @convert.call
+      @png.save(@output)
     end
 
   end
