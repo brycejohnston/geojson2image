@@ -5,7 +5,7 @@ require "chunky_png"
 module Geojson2image
   class Convert
 
-    def initialize(json: nil, width: nil, height: nil,  padding: nil,
+    def initialize(json: nil, width: nil, height: nil, padding: nil,
       background: nil, fill: nil, stroke: nil,
       output: nil)
       begin
@@ -23,7 +23,7 @@ module Geojson2image
         @width_padding = 0
         @height_padding = 0
         @global_ratio = 0
-        @png = ChunkyPNG::Image.new(@width, @height, @background_color)
+        @png = ChunkyPNG::Image.new(@width, @height, @background)
       rescue Oj::ParseError
         puts "GeoJSON parse error"
       end
