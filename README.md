@@ -32,9 +32,9 @@ g2i = Geojson2image::Convert.new(
   width: 500,
   height: 500,
   padding: 50,
-  background_color: "#ffffff",
-  fill_color: "#008000",
-  stroke_color: "#006400",
+  background: "#ffffff",
+  fill: "#008000",
+  stroke: "#006400",
   output: "output.png"
 )
 g2i.to_image
@@ -55,8 +55,8 @@ feature. Example:
 
 ```json
 "properties": {
-  "fill_color": "#008000",
-  "stroke_color": "#006400"
+  "fill": "#008000",
+  "stroke": "#006400"
 },
 ```
 **Example Output**

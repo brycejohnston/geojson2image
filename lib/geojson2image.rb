@@ -6,16 +6,16 @@ module Geojson2image
   class Convert
 
     def initialize(json: nil, width: nil, height: nil,  padding: nil,
-      background_color: nil, fill_color: nil, stroke_color: nil,
+      background: nil, fill: nil, stroke: nil,
       output: nil)
       begin
         @parsed_json = Oj.load(json)
         @width = width || 500
         @height = height || 500
         @padding = padding || 50
-        @background_color = (background_color.nil? ? ChunkyPNG::Color::WHITE : ChunkyPNG::Color.from_hex(background_color))
-        @fill_color = (fill_color.nil? ? ChunkyPNG::Color::TRANSPARENT : ChunkyPNG::Color.from_hex(fill_color))
-        @stroke_color = (stroke_color.nil? ? ChunkyPNG::Color::BLACK : ChunkyPNG::Color.from_hex(stroke_color))
+        @background = (background.nil? ? ChunkyPNG::Color::WHITE : ChunkyPNG::Color.from_hex(background))
+        @fill = (fill.nil? ? ChunkyPNG::Color::TRANSPARENT : ChunkyPNG::Color.from_hex(fill))
+        @stroke = (stroke.nil? ? ChunkyPNG::Color::BLACK : ChunkyPNG::Color.from_hex(stroke))
         @output = output || "output.png"
         @min_xy = [-1, -1]
         @max_xy = [-1, -1]
@@ -146,16 +146,16 @@ module Geojson2image
         end
 
       when 'Point'
-        tmp_stroke_color = @stroke_color
+        tmp_stroke = @stroke
         if !properties.nil?
-          if properties.key?('stroke_color') && !properties['stroke_color'].nil?
-            tmp_stroke_color = ChunkyPNG::Color.from_hex(properties['stroke_color'])
+          if properties.key?('stroke') && !properties['stroke'].nil?
+            tmp_stroke = ChunkyPNG::Color.from_hex(properties['stroke'])
           end
         end
 
         point = json['coordinates']
         new_point = transform_point(point)
-        @png.compose_pixel(new_point[0], new_point[1], tmp_stroke_color)
+        @png.compose_pixel(new_point[0], new_point[1], tmp_stroke)
 
       when 'MultiPoint'
         json['coordinates'].each do |coordinate|
@@ -167,10 +167,10 @@ module Geojson2image
         end
 
       when 'LineString'
-        tmp_stroke_color = @stroke_color
+        tmp_stroke = @stroke
         if !properties.nil?
-          if properties.key?('stroke_color') && !properties['stroke_color'].nil?
-            tmp_stroke_color = ChunkyPNG::Color.from_hex(properties['stroke_color'])
+          if properties.key?('stroke') && !properties['stroke'].nil?
+            tmp_stroke = ChunkyPNG::Color.from_hex(properties['stroke'])
           end
         end
 
@@ -179,7 +179,7 @@ module Geojson2image
         json['coordinates'].each do |point|
           new_point = transform_point(point)
           if !last_point.nil?
-            @png.line(last_point[0], last_point[1], new_point[0], new_point[1], tmp_stroke_color)
+            @png.line(last_point[0], last_point[1], new_point[0], new_point[1], tmp_stroke)
           end
           last_point = new_point
         end
@@ -194,14 +194,14 @@ module Geojson2image
         end
 
       when 'Polygon'
-        tmp_fill_color = @fill_color
-        tmp_stroke_color = @stroke_color
+        tmp_fill = @fill
+        tmp_stroke = @stroke
         if !properties.nil?
-          if properties.key?('fill_color') && !properties['fill_color'].nil?
-            tmp_fill_color = ChunkyPNG::Color.from_hex(properties['fill_color'])
+          if properties.key?('fill') && !properties['fill'].nil?
+            tmp_fill = ChunkyPNG::Color.from_hex(properties['fill'])
           end
-          if properties.key?('stroke_color') && !properties['stroke_color'].nil?
-            tmp_stroke_color = ChunkyPNG::Color.from_hex(properties['stroke_color'])
+          if properties.key?('stroke') && !properties['stroke'].nil?
+            tmp_stroke = ChunkyPNG::Color.from_hex(properties['stroke'])
           end
         end
 
@@ -217,7 +217,7 @@ module Geojson2image
           end
 
           points = ChunkyPNG::Vector.multiple_from_string(border_points.join(", "))
-          @png.polygon(points, tmp_stroke_color, tmp_fill_color)
+          @png.polygon(points, tmp_stroke, tmp_fill)
         end
 
       when 'MultiPolygon'
