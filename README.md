@@ -35,7 +35,7 @@ g2i = Geojson2image::Convert.new(
   background_color: "#ffffff",
   fill_color: "#008000",
   stroke_color: "#006400",
-  output: "output.jpg"
+  output: "output.png"
 )
 g2i.to_image
 ```

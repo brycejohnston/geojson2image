@@ -16,7 +16,7 @@ module Geojson2image
         @background_color = (background_color.nil? ? ChunkyPNG::Color::WHITE : ChunkyPNG::Color.from_hex(background_color))
         @fill_color = (fill_color.nil? ? ChunkyPNG::Color::TRANSPARENT : ChunkyPNG::Color.from_hex(fill_color))
         @stroke_color = (stroke_color.nil? ? ChunkyPNG::Color::BLACK : ChunkyPNG::Color.from_hex(stroke_color))
-        @output = output || "output.jpg"
+        @output = output || "output.png"
         @min_xy = [-1, -1]
         @max_xy = [-1, -1]
         @coordinates = []
