@@ -205,20 +205,18 @@ module Geojson2image
           end
         end
 
+        border_points = []
         json['coordinates'].each do |linestrings|
-          border_points = []
           if linestrings[0] != linestrings[linestrings.count - 1]
             linestrings << linestrings[0]
           end
-
           linestrings.each do |point|
             new_point = transform_point(point)
             border_points << "#{new_point[0]},#{new_point[1]}"
           end
-
-          points = ChunkyPNG::Vector.multiple_from_string(border_points.join(", "))
-          @png.polygon(points, tmp_stroke, tmp_fill)
         end
+        points = ChunkyPNG::Vector.multiple_from_string(border_points.join(", "))
+        @png.polygon(points, tmp_stroke, tmp_fill)
 
       when 'MultiPolygon'
         json['coordinates'].each do |polygon|
